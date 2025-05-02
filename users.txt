@@ -1,0 +1,7 @@
+Berikut adalah password asli yang dapat digunakan untuk akun-akun tersebut:
+
+operator: Password123
+supervisor: Super2025!
+manager: Manager@2025
+staff: StaffAccess2025
+analyst: Analyst#2025
