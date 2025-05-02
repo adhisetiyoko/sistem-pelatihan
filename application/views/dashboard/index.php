@@ -1,7 +1,7 @@
 <!-- application/views/dashboard/index.php -->
 <div class="container py-4">
     <h2 class="text-center mb-4 fw-bold text-primary">Selamat Datang di Sistem Informasi Pelatihan</h2>
-    
+
     <div class="row g-4">
         <!-- Card Peserta Pelatihan -->
         <div class="col-md-6 col-lg-4">
@@ -44,7 +44,7 @@
                 </div>
             </div>
         </div>
-
+        
         <!-- Card Tambahan (Opsional) -->
         <div class="col-md-6 col-lg-4">
             <div class="card border-0 shadow-lg h-100 hover-effect" style="border-radius: 15px;">
@@ -72,14 +72,17 @@
     .hover-effect {
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
+
     .hover-effect:hover {
         transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
     }
+
     .btn-rounded {
         border-radius: 50px;
         padding: 8px 20px;
     }
+
     .card {
         overflow: hidden;
     }

@@ -10,6 +10,8 @@ defined('BASEPATH') or exit('No direct script access allowed');
  * @property Peserta_model $Peserta_model
  * @property User_model $User_model
  * @property CI_Output $output
+ * @property Pdf $pdf
+
  */
 class Dashboard extends MY_Controller
 {
@@ -19,6 +21,7 @@ class Dashboard extends MY_Controller
         if (!$this->session->userdata('logged_in')) redirect('auth');
         $this->load->model(['Peserta_model', 'User_model']);
         $this->load->helper('user_status');
+        $this->load->library('pdf'); // ini akan load application/libraries/Pdf.php
     }
 
     public function index()
@@ -230,7 +233,7 @@ class Dashboard extends MY_Controller
         $this->load->view('dashboard/peserta/detail_peserta', $data);
         $this->load->view('templates/footer');
     }
- 
+
     public function hapus_peserta($id)
     {
         $this->Peserta_model->delete($id);
@@ -380,6 +383,73 @@ class Dashboard extends MY_Controller
         }
 
         echo $output;
+        exit;
+    }
+
+    public function export_pdf()
+    {
+        $this->load->library('pdf');
+
+        // Ambil data peserta
+        $search = $this->input->get('search');
+        $data['peserta'] = $this->Peserta_model->search_peserta($search);
+
+        // Load view sebagai string
+        $html = $this->load->view('dashboard/peserta/export_pdf', $data, true);
+
+        // Generate PDF
+        $this->pdf->createPDF($html, 'Data_Peserta_' . date('Ymd'));
+    }
+
+    public function export_excel()
+    {
+        $search = $this->input->get('search');
+
+        // Load model
+        $this->load->model('Peserta_model');
+
+        // Get data
+        if ($search) {
+            $peserta = $this->Peserta_model->search_peserta($search);
+        } else {
+            $peserta = $this->Peserta_model->count_all();
+        }
+
+        // Load PhpSpreadsheet
+        require_once FCPATH . 'vendor/autoload.php';
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Set document properties
+        $spreadsheet->getProperties()
+            ->setCreator("Sistem Pelatihan")
+            ->setTitle("Data Peserta Pelatihan");
+
+        // Set header
+        $sheet->setCellValue('A1', 'NO')
+            ->setCellValue('B1', 'NIK')
+            ->setCellValue('C1', 'NO INDUK')
+            // ... (lanjutkan header lainnya)
+        ;
+
+        // Isi data
+        $row = 2;
+        foreach ($peserta as $index => $p) {
+            $sheet->setCellValue('A' . $row, $index + 1)
+                ->setCellValue('B' . $row, $p->nik_peserta)
+                // ... (lanjutkan isi data lainnya)
+            ;
+            $row++;
+        }
+
+        // Export ke Excel
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xls($spreadsheet);
+
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment;filename="Data_Peserta.xls"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
         exit;
     }
 }

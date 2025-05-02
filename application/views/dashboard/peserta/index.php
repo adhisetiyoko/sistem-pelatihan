@@ -1,7 +1,18 @@
 <!-- application/views/dashboard/peserta/index.php -->
 <div class="container-fluid py-4">
 
-    <div class="mb-4 d-flex justify-content-end">
+    <div class="mb-4 d-flex justify-content-between align-items-center">
+        <!-- Tombol Print PDF -->
+        <div class="btn-group">
+            <button class="btn btn-danger btn-rounded px-3 py-2 me-2" id="printPDF">
+                <i class="fas fa-file-pdf me-1"></i> Print PDF
+            </button>
+            <button class="btn btn-success btn-rounded px-3 py-2" id="printExcel">
+                <i class="fas fa-file-excel me-1"></i> Excel
+            </button>
+        </div>
+
+        <!-- Search Box (existing code) -->
         <div class="search-container position-relative">
             <form action="<?= base_url('dashboard/peserta') ?>" method="GET" class="w-100" id="searchForm">
                 <div class="input-group search-wrapper shadow rounded-pill overflow-hidden">
@@ -111,6 +122,29 @@
 </div>
 
 <style>
+    /* Style untuk tombol print */
+    #printPDF,
+    #printExcel {
+        transition: all 0.3s ease;
+    }
+
+    #printPDF:hover {
+        background-color: #dc3545 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+    }
+
+    #printExcel:hover {
+        background-color: #198754 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(25, 135, 84, 0.3);
+    }
+
+    /* Atur spacing antara tombol dan search */
+    .search-container {
+        margin-left: auto;
+    }
+
     /* Tambahkan gradasi ke CSS */
     .bg-gradient-primary {
         background: linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%) !important;
@@ -333,6 +367,35 @@
 
 <!-- // Ganti script yang ada dengan ini -->
 <script>
+    $(document).ready(function() {
+        // Print PDF
+        $('#printPDF').click(function() {
+            // Dapatkan parameter search jika ada
+            var searchParam = $('input[name="search"]').val();
+            var url = '<?= base_url('dashboard/export_pdf') ?>';
+
+            if (searchParam) {
+                url += '?search=' + encodeURIComponent(searchParam);
+            }
+
+            // Buka di tab baru
+            window.open(url, '_blank');
+        });
+
+        // Print Excel
+        $('#printExcel').click(function() {
+            var searchParam = $('input[name="search"]').val();
+            var url = '<?= base_url('dashboard/export_excel') ?>';
+
+            if (searchParam) {
+                url += '?search=' + encodeURIComponent(searchParam);
+            }
+
+            window.location.href = url;
+        });
+    });
+
+
     $(document).ready(function() {
         var searchTimer;
 
