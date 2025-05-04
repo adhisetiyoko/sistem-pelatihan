@@ -45,7 +45,7 @@
                             <th class="text-center" style="width: 60px;">No</th>
                             <th>Username</th>
                             <th>Email</th>
-                            <th class="text-center" style="width: 100px;">Status</th>
+                            <th class="text-center" style="width: 150px;">Status</th>
                             <th class="text-center">Terakhir Login</th>
                         </tr>
                     </thead>

@@ -23,7 +23,7 @@ class User_model extends CI_Model
         ];
 
         $this->db->insert('users', $user_data);
-        
+
         if ($this->db->affected_rows() > 0) {
             return $this->db->insert_id();
         }
@@ -151,10 +151,10 @@ class User_model extends CI_Model
             'last_activity' => date('Y-m-d H:i:s'),
             'is_active' => 1
         ];
-        
+
         $this->db->where('id', $user_id);
         $result = $this->db->update('users', $data);
-        
+
         if (!$result) {
             log_message('error', 'Failed to update last login: ' . print_r($this->db->error(), TRUE));
             return false;
@@ -172,7 +172,7 @@ class User_model extends CI_Model
         $this->db->set('last_activity', date('Y-m-d H:i:s'));
         $this->db->where('id', $user_id);
         $result = $this->db->update('users');
-        
+
         if (!$result) {
             log_message('error', 'Failed to update last activity: ' . print_r($this->db->error(), TRUE));
             return false;
@@ -191,10 +191,10 @@ class User_model extends CI_Model
             'last_logout' => date('Y-m-d H:i:s'),
             'last_activity' => date('Y-m-d H:i:s')
         ];
-        
+
         $this->db->where('id', $user_id);
         $result = $this->db->update('users', $data);
-        
+
         if (!$result) {
             log_message('error', 'Failed to update logout status: ' . print_r($this->db->error(), TRUE));
             return false;
@@ -211,7 +211,7 @@ class User_model extends CI_Model
     {
         $this->db->where('id', $user_id);
         $query = $this->db->get('users');
-        
+
         if ($query->num_rows() > 0) {
             return $query->row();
         }
@@ -250,7 +250,7 @@ class User_model extends CI_Model
     {
         $this->db->where('id', $user_id);
         $result = $this->db->update('users', $data);
-        
+
         if (!$result) {
             log_message('error', 'Failed to update profile: ' . print_r($this->db->error(), TRUE));
             return false;
@@ -269,11 +269,47 @@ class User_model extends CI_Model
         $this->db->set('password', password_hash($new_password, PASSWORD_DEFAULT));
         $this->db->where('id', $user_id);
         $result = $this->db->update('users');
-        
+
         if (!$result) {
             log_message('error', 'Failed to change password: ' . print_r($this->db->error(), TRUE));
             return false;
         }
         return true;
+    }
+
+    public function get_user_by_username($username)
+    {
+        return $this->db->get_where($this->table, ['username' => $username])->row();
+    }
+
+    public function get_user_by_email($email)
+    {
+        return $this->db->get_where($this->table, ['email' => $email])->row();
+    }
+
+    public function update_user($user_id, $data)
+    {
+        $this->db->where('id', $user_id);
+        return $this->db->update('users', $data);
+    }
+
+    public function check_password($user_id, $password)
+    {
+        $user = $this->get_user_by_id($user_id);
+        if ($user) {
+            return password_verify($password, $user->password);
+        }
+        return false;
+    }
+
+    public function toggle_active_status($user_id)
+    {
+        $user = $this->get_user_by_id($user_id);
+        if ($user) {
+            $new_status = $user->is_active ? 0 : 1;
+            $this->db->where('id', $user_id);
+            return $this->db->update($this->table, ['is_active' => $new_status]);
+        }
+        return false;
     }
 }

@@ -35,13 +35,16 @@
                             <td>: <?= $peserta->nama_peserta ?></td>
                         </tr>
                         <tr>
-                            <th>Modul Pelatihan</th>
-                            <td>: <span class="badge bg-<?= 
-                                ($peserta->modul_pelatihan == 'Pemrograman') ? 'info' : 
-                                (($peserta->modul_pelatihan == 'Desain Grafis') ? 'warning' : 'success') 
-                            ?>">
-                                <?= $peserta->modul_pelatihan ?>
-                            </span></td>
+                            <th>Jenis Kelamin</th>
+                            <td>: <?= $peserta->jenis_kelamin ?></td>
+                        </tr>
+                        <tr>
+                            <th>Tempat Lahir</th>
+                            <td>: <?= $peserta->tempat_lahir ?></td>
+                        </tr>
+                        <tr>
+                            <th>Tanggal Lahir</th>
+                            <td>: <?= date('d-m-Y', strtotime($peserta->tanggal_lahir)) ?></td>
                         </tr>
                         <tr>
                             <th>Alamat</th>
@@ -50,6 +53,32 @@
                         <tr>
                             <th>No HP</th>
                             <td>: <?= $peserta->no_telp ?></td>
+                        </tr>
+                        <tr>
+                            <th>Modul Pelatihan</th>
+                            <td>: <span class="badge bg-<?=
+                                                        ($peserta->modul_pelatihan == 'Pemrograman') ? 'info' : (($peserta->modul_pelatihan == 'Desain Grafis') ? 'warning' : 'success')
+                                                        ?>">
+                                    <?= $peserta->modul_pelatihan ?>
+                                </span></td>
+                        </tr>
+                        <tr>
+                            <th>Status Aktif</th>
+                            <td>:
+                                <?php if ($peserta->status_aktif): ?>
+                                    <span class="badge bg-success">Aktif</span>
+                                <?php else: ?>
+                                    <span class="badge bg-secondary">Tidak Aktif</span>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Created At</th>
+                            <td>: <?= date('d-m-Y H:i:s', strtotime($peserta->created_at)) ?></td>
+                        </tr>
+                        <tr>
+                            <th>Updated At</th>
+                            <td>: <?= date('d-m-Y H:i:s', strtotime($peserta->updated_at)) ?></td>
                         </tr>
                     </table>
                 </div>
@@ -63,6 +92,7 @@
     </div>
 </div>
 
+
 <style>
     .avatar-lg {
         width: 100px;
@@ -71,6 +101,7 @@
         font-size: 2rem;
         line-height: 100px;
     }
+
     .icon-circle {
         width: 48px;
         height: 48px;
@@ -79,23 +110,28 @@
         align-items: center;
         justify-content: center;
     }
+
     .bg-gradient-primary {
         background: linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%) !important;
     }
+
     .badge {
         padding: 6px 10px;
         font-weight: 500;
         font-size: 0.75rem;
     }
+
     .table th {
         font-weight: 600;
         font-size: 0.85rem;
         color: #495057;
     }
+
     .table td {
         vertical-align: middle;
         font-size: 0.9rem;
     }
+
     .btn {
         border-radius: 8px;
         font-weight: 500;
