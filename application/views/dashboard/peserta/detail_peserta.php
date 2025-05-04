@@ -56,10 +56,9 @@
                         </tr>
                         <tr>
                             <th>Modul Pelatihan</th>
-                            <td>: <span class="badge bg-<?=
-                                                        ($peserta->modul_pelatihan == 'Pemrograman') ? 'info' : (($peserta->modul_pelatihan == 'Desain Grafis') ? 'warning' : 'success')
-                                                        ?>">
-                                    <?= $peserta->modul_pelatihan ?>
+                            <td>: 
+                                <span class="badge bg-<?= ($peserta->nama_modul == 'Pemrograman') ? 'info' : (($peserta->nama_modul == 'Desain Grafis') ? 'warning' : 'success') ?>">
+                                    <?= $peserta->nama_modul ?>
                                 </span></td>
                         </tr>
                         <tr>

@@ -66,10 +66,10 @@
 
                         <div class="col-md-4">
                             <div class="form-floating mb-3">
-                                <select name="jenis_kelamin" class="form-select form-select-lg" id="jenis_kelamin" required>
+                                <select name="jenis_kelamin_id" class="form-select form-select-lg" id="jenis_kelamin" required>
                                     <option value="" disabled selected>Pilih Jenis Kelamin</option>
-                                    <option value="Laki-laki" <?php echo set_select('jenis_kelamin', 'Laki-laki', ($peserta->jenis_kelamin == 'Laki-laki')); ?>>Laki-laki</option>
-                                    <option value="Perempuan" <?php echo set_select('jenis_kelamin', 'Perempuan', ($peserta->jenis_kelamin == 'Perempuan')); ?>>Perempuan</option>
+                                    <option value="Laki-laki" <?php echo set_select('jenis_kelamin_id', 'Laki-laki', ($peserta->jenis_kelamin_id == 'Laki-laki')); ?>>Laki-laki</option>
+                                    <option value="Perempuan" <?php echo set_select('jenis_kelamin_id', 'Perempuan', ($peserta->jenis_kelamin_id == 'Perempuan')); ?>>Perempuan</option>
                                 </select>
                                 <label for="jenis_kelamin" class="text-muted">
                                     <i class="fas fa-venus-mars me-2"></i>Jenis Kelamin
@@ -113,18 +113,19 @@
 
                         <div class="col-md-6">
                             <div class="form-floating mb-3">
-                                <select name="modul_pelatihan" class="form-select form-select-lg" id="modul_pelatihan" required>
+                                <select name="id_modul" class="form-select form-select-lg" id="id_modul" required>
                                     <option value="" disabled selected>Pilih Modul Pelatihan</option>
-                                    <option value="Pemrograman" <?php echo set_select('modul_pelatihan', 'Pemrograman', ($peserta->modul_pelatihan == 'Pemrograman')); ?>>Pemrograman</option>
-                                    <option value="Desain Grafis" <?php echo set_select('modul_pelatihan', 'Desain Grafis', ($peserta->modul_pelatihan == 'Desain Grafis')); ?>>Desain Grafis</option>
-                                    <option value="Animasi" <?php echo set_select('modul_pelatihan', 'Animasi', ($peserta->modul_pelatihan == 'Animasi')); ?>>Animasi</option>
+                                    <option value="1" <?php echo set_select('id_modul', '1', ($peserta->id_modul == '1')); ?>>Pemrograman</option>
+                                    <option value="2" <?php echo set_select('id_modul', '2', ($peserta->id_modul == '2')); ?>>Desain Grafis</option>
+                                    <option value="3" <?php echo set_select('id_modul', '3', ($peserta->id_modul == '3')); ?>>Animasi</option>
                                 </select>
-                                <label for="modul_pelatihan" class="text-muted">
+                                <label for="id_modul" class="text-muted">
                                     <i class="fas fa-book me-2"></i>Modul Pelatihan
                                 </label>
                                 <div class="invalid-feedback">Harap pilih modul pelatihan</div>
                             </div>
                         </div>
+
 
                         <div class="col-12">
                             <div class="form-floating mb-3">

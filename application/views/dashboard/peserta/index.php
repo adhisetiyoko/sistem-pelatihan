@@ -81,12 +81,13 @@
                                         </div>
                                     </div>
                                 </td>
+
                                 <td class="text-center">
-                                    <span class="badge bg-<?= ($p->modul_pelatihan == 'Pemrograman') ? 'info' : (($p->modul_pelatihan == 'Desain Grafis') ? 'warning' : 'success')
-                                                            ?>">
-                                        <?= $p->modul_pelatihan ?>
+                                    <span class="badge bg-<?= ($p->nama_modul == 'Pemrograman') ? 'info' : (($p->nama_modul == 'Desain Grafis') ? 'warning' : 'success') ?>">
+                                        <?= $p->nama_modul ?>
                                     </span>
                                 </td>
+
                                 <td class="text-center">
                                     <div class="btn-group btn-group-sm">
                                         <a href="<?= base_url('dashboard/edit_peserta/' . $p->id_peserta) ?>" class="btn btn-outline-primary px-3" title="Edit">
@@ -403,23 +404,13 @@
         $('input[name="search"]').on('input', function() {
             var searchTerm = $(this).val().trim();
 
-            // Toggle clear button
-            if (searchTerm.length > 0) {
-                $('.search-container').addClass('has-value');
-            } else {
-                $('.search-container').removeClass('has-value');
-                // Jika search kosong, reload halaman
-                window.location.href = '<?= base_url('dashboard/peserta') ?>';
-                return;
-            }
-
             // Clear timer sebelumnya
             clearTimeout(searchTimer);
 
-            // Set timer baru (debounce 300ms)
+            // Set timer baru (debounce 500ms)
             searchTimer = setTimeout(function() {
                 performLiveSearch(searchTerm);
-            }, 300);
+            }, 500);
         });
 
         // Fungsi untuk melakukan live search via AJAX
@@ -431,14 +422,14 @@
                     search: searchTerm
                 },
                 beforeSend: function() {
-                    // Tampilkan loading indicator
                     $('tbody').html('<tr><td colspan="6" class="text-center py-4"><div class="spinner-border text-primary" role="status"></div></td></tr>');
                 },
                 success: function(response) {
                     $('tbody').html(response);
                 },
-                error: function() {
-                    $('tbody').html('<tr><td colspan="6" class="text-center text-danger py-4">Gagal memuat data</td></tr>');
+                error: function(xhr) {
+                    console.error(xhr.responseText);
+                    $('tbody').html('<tr><td colspan="6" class="text-center text-danger py-4">Error: Gagal memuat data</td></tr>');
                 }
             });
         }
@@ -447,8 +438,7 @@
         $('.clear-btn').on('click', function(e) {
             e.preventDefault();
             $('input[name="search"]').val('');
-            $('.search-container').removeClass('has-value');
-            window.location.href = '<?= base_url('dashboard/peserta') ?>';
+            performLiveSearch('');
         });
     });
 </script>

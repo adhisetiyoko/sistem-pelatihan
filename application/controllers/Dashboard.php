@@ -11,8 +11,19 @@ defined('BASEPATH') or exit('No direct script access allowed');
  * @property User_model $User_model
  * @property CI_Output $output
  * @property Pdf $pdf
+ * @property db $db
 
  */
+
+
+// Tambahkan ini di luar fungsi, sebelum class
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+
 class Dashboard extends MY_Controller
 {
     public function __construct()
@@ -79,7 +90,7 @@ class Dashboard extends MY_Controller
                 'pagination' => $this->pagination->create_links(),
                 'search' => $search,
                 'total_rows' => $config['total_rows'],
-                'showing' => $this->Peserta_model->count_search_results($search) ?: $this->Peserta_model->count_all()
+                'showing' => $this->Peserta_model->count_search_results($search) ?: $this->Peserta_model->count_all(),
             ];
 
             $this->load->view('templates/header', $data);
@@ -109,63 +120,51 @@ class Dashboard extends MY_Controller
         if ($peserta) {
             foreach ($peserta as $p) {
                 $output .= '
-            <tr class="user-row hover-effect">
-                <td class="text-center">' . $no++ . '</td>
-                <td>' . htmlspecialchars($p->nik_peserta) . '</td>
-                <td>' . htmlspecialchars($p->no_induk_peserta) . '</td>
-                <td>
-                    <div class="d-flex align-items-center">
-                        <div class="avatar-sm bg-primary text-white rounded-circle me-3 d-flex align-items-center justify-content-center">
-                            ' . strtoupper(substr($p->nama_peserta, 0, 1)) . '
-                        </div>
-                        <div>
-                            <h6 class="mb-0">' . htmlspecialchars($p->nama_peserta) . '</h6>
-                        </div>
+        <tr class="user-row hover-effect">
+            <td class="text-center">' . $no++ . '</td>
+            <td>' . htmlspecialchars($p->nik_peserta) . '</td>
+            <td>' . htmlspecialchars($p->no_induk_peserta) . '</td>
+            <td>
+                <div class="d-flex align-items-center">
+                    <div class="avatar-sm bg-primary text-white rounded-circle me-3 d-flex align-items-center justify-content-center">
+                        ' . strtoupper(substr($p->nama_peserta, 0, 1)) . '
                     </div>
-                </td>
-                <td class="text-center">
-                    <span class="badge bg-' . ($p->modul_pelatihan == 'Pemrograman' ? 'info' : ($p->modul_pelatihan == 'Desain Grafis' ? 'warning' : 'success')) . '">
-                        ' . htmlspecialchars($p->modul_pelatihan) . '
-                    </span>
-                </td>
-                <td class="text-center">
-                    <div class="btn-group btn-group-sm">
-                        <a href="' . base_url('dashboard/edit_peserta/' . $p->id_peserta) . '" class="btn btn-outline-primary px-3" title="Edit">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <a href="' . base_url('dashboard/hapus_peserta/' . $p->id_peserta) . '" class="btn btn-outline-danger px-3" title="Hapus" onclick="return confirm(\'Yakin ingin menghapus peserta ini?\')">
-                            <i class="fas fa-trash-alt"></i>
-                        </a>
-                        <a href="' . base_url('dashboard/detail_peserta/' . $p->id_peserta) . '" class="btn btn-outline-info px-3" title="Detail">
-                            <i class="fas fa-eye"></i>
-                        </a>
+                    <div>
+                        <h6 class="mb-0">' . htmlspecialchars($p->nama_peserta) . '</h6>
                     </div>
-                </td>
-            </tr>';
+                </div>
+            </td>
+            <td class="text-center">
+                <span class="badge bg-' . ($p->nama_modul == 'Pemrograman' ? 'info' : ($p->nama_modul == 'Desain Grafis' ? 'warning' : 'success')) . '">
+                    ' . htmlspecialchars($p->nama_modul) . '
+                </span>
+            </td>
+            <td class="text-center">
+                <div class="btn-group btn-group-sm">
+                    <a href="' . base_url('dashboard/edit_peserta/' . $p->id_peserta) . '" class="btn btn-outline-primary px-3" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <a href="' . base_url('dashboard/hapus_peserta/' . $p->id_peserta) . '" class="btn btn-outline-danger px-3" title="Hapus" onclick="return confirm(\'Yakin ingin menghapus peserta ini?\')">
+                        <i class="fas fa-trash-alt"></i>
+                    </a>
+                    <a href="' . base_url('dashboard/detail_peserta/' . $p->id_peserta) . '" class="btn btn-outline-info px-3" title="Detail">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                </div>
+            </td>
+        </tr>';
             }
-
-            // Add pagination and counter update
-            $output .= '
-        <script>
-            $(document).ready(function() {
-                // Update showing count
-                $("#showingCount").text(' . count($peserta) . ');
-                $("#totalCount").text(' . $total_results . ');
-                
-                // Re-init pagination
-                initPagination(' . $total_results . ', ' . $per_page . ', ' . $page . ', "' . htmlspecialchars($search, ENT_QUOTES) . '");
-            });
-        </script>';
         } else {
-            $output = '<tr><td colspan="6" class="text-center py-4">Tidak ditemukan data peserta</td></tr>
-        <script>
-            $(document).ready(function() {
-                $("#showingCount").text(0);
-                $("#totalCount").text(0);
-                $(".pagination").html("");
-            });
-        </script>';
+            $output = '<tr><td colspan="6" class="text-center py-4">Tidak ditemukan data peserta</td></tr>';
         }
+
+        // Kirim juga total hasil untuk update counter
+        $output .= '<script>
+        $(document).ready(function() {
+            $("#showingCount").text(' . count($peserta) . ');
+            $("#totalCount").text(' . $total_results . ');
+        });
+        </script>';
 
         echo $output;
         exit;
@@ -179,31 +178,89 @@ class Dashboard extends MY_Controller
 
     public function tambah_peserta()
     {
+        // Set form validation rules
         $this->form_validation->set_rules('nik_peserta', 'NIK', 'required|is_unique[peserta_pelatihan.nik_peserta]');
         $this->form_validation->set_rules('no_induk_peserta', 'No Induk', 'required|is_unique[peserta_pelatihan.no_induk_peserta]');
-        // Set rules lainnya...
+        $this->form_validation->set_rules('nama_peserta', 'Nama Peserta', 'required');
+        $this->form_validation->set_rules('jenis_kelamin_id', 'Jenis Kelamin', 'required');
+        $this->form_validation->set_rules('tempat_lahir', 'Tempat Lahir', 'required');
+        $this->form_validation->set_rules('tanggal_lahir', 'Tanggal Lahir', 'required|callback_valid_date');
+        $this->form_validation->set_rules('no_telp', 'No HP', 'required|numeric');
+        $this->form_validation->set_rules('id_modul', 'Modul Pelatihan', 'required');
+        $this->form_validation->set_rules('alamat', 'Alamat', 'required');
 
         if ($this->form_validation->run() === FALSE) {
-            $this->load->view('templates/header', ['title' => 'Tambah Peserta']);
-            $this->load->view('dashboard/peserta/tambah');
+            // Jika form validation gagal, tampilkan form lagi
+            $data = [
+                'title' => 'Tambah Peserta',
+                'nik_peserta' => $this->input->post('nik_peserta'),
+                'no_induk_peserta' => $this->input->post('no_induk_peserta'),
+                'nama_peserta' => $this->input->post('nama_peserta'),
+                'jenis_kelamin_id' => $this->input->post('jenis_kelamin_id'),
+                'tempat_lahir' => $this->input->post('tempat_lahir'),
+                'tanggal_lahir' => $this->input->post('tanggal_lahir'),
+                'no_telp' => $this->input->post('no_telp'),
+                'id_modul' => $this->input->post('id_modul'),
+                'alamat' => $this->input->post('alamat'),
+            ];
+
+            $this->load->view('templates/header', $data);
+            $this->load->view('dashboard/peserta/tambah', $data);
             $this->load->view('templates/footer');
         } else {
-            $this->Peserta_model->create($this->input->post());
+            // Cek jika nik_peserta atau no_induk_peserta sudah ada di database
+            $nik_peserta = $this->input->post('nik_peserta');
+            $no_induk_peserta = $this->input->post('no_induk_peserta');
+
+            // Cek keberadaan nik_peserta dan no_induk_peserta
+            if ($nik_peserta === $no_induk_peserta) {
+                $this->session->set_flashdata('error', 'NIK dan No Induk Peserta tidak boleh sama.');
+                redirect('dashboard/tambah_peserta');
+                return;
+            }
+
+            // Cek keberadaan nik_peserta
+            $nik_exists = $this->db->get_where('peserta_pelatihan', ['nik_peserta' => $nik_peserta])->num_rows() > 0;
+            // Cek keberadaan no_induk_peserta
+            $no_induk_exists = $this->db->get_where('peserta_pelatihan', ['no_induk_peserta' => $no_induk_peserta])->num_rows() > 0;
+
+            if ($nik_exists) {
+                $this->session->set_flashdata('error', 'NIK sudah terdaftar');
+                redirect('dashboard/peserta/tambah');
+            }
+
+            if ($no_induk_exists) {
+                $this->session->set_flashdata('error', 'No Induk sudah terdaftar');
+                redirect('dashboard/peserta/tambah');
+            }
+
+            // Jika data tidak ada di database, lanjutkan penyimpanan
+            $peserta_data = $this->input->post();
+            $this->Peserta_model->create($peserta_data);
             $this->session->set_flashdata('success', 'Data peserta berhasil ditambahkan');
             redirect('dashboard/peserta');
         }
     }
 
+
+
     public function edit_peserta($id)
     {
         $this->form_validation->set_rules('nik_peserta', 'NIK', 'required');
         $this->form_validation->set_rules('no_induk_peserta', 'No Induk', 'required');
-        // Set rules lainnya...
+        $this->form_validation->set_rules('nama_peserta', 'Nama Peserta', 'required');
+        $this->form_validation->set_rules('jenis_kelamin_id', 'Jenis Kelamin', 'required');
+        $this->form_validation->set_rules('tempat_lahir', 'Tempat Lahir', 'required');
+        $this->form_validation->set_rules('tanggal_lahir', 'Tanggal Lahir', 'required|callback_valid_date');
+        $this->form_validation->set_rules('no_telp', 'No HP', 'required|numeric');
+        $this->form_validation->set_rules('id_modul', 'Modul Pelatihan', 'required');
+        $this->form_validation->set_rules('alamat', 'Alamat', 'required');
 
         if ($this->form_validation->run() === FALSE) {
             $data = [
                 'title' => 'Edit Peserta',
-                'peserta' => $this->Peserta_model->read($id)
+                'peserta' => $this->Peserta_model->read($id),
+
             ];
 
             $this->load->view('templates/header', $data);
@@ -390,66 +447,115 @@ class Dashboard extends MY_Controller
     {
         $this->load->library('pdf');
 
-        // Ambil data peserta
         $search = $this->input->get('search');
-        $data['peserta'] = $this->Peserta_model->search_peserta($search);
+        $data['peserta'] = $this->Peserta_model->search_peserta($search, 1000, 0);
 
-        // Load view sebagai string
         $html = $this->load->view('dashboard/peserta/export_pdf', $data, true);
 
-        // Generate PDF
-        $this->pdf->createPDF($html, 'Data_Peserta_' . date('Ymd'));
+        ob_clean(); // Bersihkan output buffer
+
+        // Panggil dengan parameter landscape
+        $this->pdf->createPDF($html, 'Data_Peserta_' . date('Ymd'), true, 'L');
     }
 
     public function export_excel()
     {
-        $search = $this->input->get('search');
+        ob_clean(); // Pastikan tidak ada output sebelumnya
 
-        // Load model
+        // Ambil data dari model
         $this->load->model('Peserta_model');
+        $search = $this->input->get('search');
+        $data = $this->Peserta_model->search_peserta($search, null, null);
 
-        // Get data
-        if ($search) {
-            $peserta = $this->Peserta_model->search_peserta($search);
-        } else {
-            $peserta = $this->Peserta_model->count_all();
-        }
+        // Load library PhpSpreadsheet
+        require_once APPPATH . 'third_party/PhpSpreadsheet/vendor/autoload.php';
 
-        // Load PhpSpreadsheet
-        require_once FCPATH . 'vendor/autoload.php';
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        // Set document properties
+        // Set properti file
         $spreadsheet->getProperties()
             ->setCreator("Sistem Pelatihan")
+            ->setLastModifiedBy("Sistem Pelatihan")
             ->setTitle("Data Peserta Pelatihan");
 
-        // Set header
+        // Header
         $sheet->setCellValue('A1', 'NO')
             ->setCellValue('B1', 'NIK')
             ->setCellValue('C1', 'NO INDUK')
-            // ... (lanjutkan header lainnya)
-        ;
+            ->setCellValue('D1', 'NAMA PESERTA')
+            ->setCellValue('E1', 'JENIS KELAMIN')
+            ->setCellValue('F1', 'MODUL PELATIHAN');
 
         // Isi data
         $row = 2;
-        foreach ($peserta as $index => $p) {
-            $sheet->setCellValue('A' . $row, $index + 1)
-                ->setCellValue('B' . $row, $p->nik_peserta)
-                // ... (lanjutkan isi data lainnya)
-            ;
+        foreach ($data as $key => $p) {
+            $sheet->setCellValue('A' . $row, $key + 1)
+                ->setCellValueExplicit('B' . $row, $p->nik_peserta, DataType::TYPE_STRING)
+                ->setCellValue('C' . $row, $p->no_induk_peserta)
+                ->setCellValue('D' . $row, $p->nama_peserta)
+                ->setCellValue('E' . $row, $p->jenis_kelamin)
+                ->setCellValue('F' . $row, $p->nama_modul);
             $row++;
         }
 
-        // Export ke Excel
-        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xls($spreadsheet);
+        // Styling header
+        $headerStyle = [
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '4472C4']],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,  // Horizontal center
+                'vertical' => Alignment::VERTICAL_CENTER       // Vertical center
+            ]
+        ];
+        $sheet->getStyle('A1:F1')->applyFromArray($headerStyle);
 
-        header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment;filename="Data_Peserta.xls"');
+        // Styling border untuk tabel
+        $borderStyle = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,  // Menggunakan border tipis
+                    'color' => ['rgb' => '000000']  // Warna border hitam
+                ]
+            ]
+        ];
+        $sheet->getStyle('A1:F' . ($row - 1))->applyFromArray($borderStyle);
+
+        // Styling untuk centerkan semua konten tabel
+        $sheet->getStyle('A1:F' . ($row - 1))
+            ->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER) // Horizontal center
+            ->setVertical(Alignment::VERTICAL_CENTER);    // Vertical center
+
+        // Autosize kolom
+        foreach (range('A', 'F') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Nama file
+        $filename = 'Data_Peserta_' . date('Ymd_His') . '.xlsx';
+
+        // Output ke browser
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment; filename=\"$filename\"");
         header('Cache-Control: max-age=0');
 
+        $writer = new Xlsx($spreadsheet);
         $writer->save('php://output');
         exit;
+    }
+
+    // Fungsi untuk validasi format tanggal
+    public function valid_date($date)
+    {
+        // Cek apakah format tanggal valid (YYYY-MM-DD)
+        $format = 'Y-m-d';
+        $d = DateTime::createFromFormat($format, $date);
+        if ($d && $d->format($format) === $date) {
+            return TRUE; // Format tanggal valid
+        } else {
+            $this->form_validation->set_message('valid_date', 'Tanggal Lahir tidak valid. Format yang benar adalah YYYY-MM-DD.');
+            return FALSE; // Format tanggal tidak valid
+        }
     }
 }

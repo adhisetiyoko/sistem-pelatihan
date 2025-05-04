@@ -29,6 +29,19 @@
 
                     <?php echo form_open('dashboard/tambah_peserta', ['class' => 'needs-validation', 'novalidate' => '']); ?>
                     <div class="row g-4">
+
+                        <?php if ($this->session->flashdata('error')): ?>
+                            <div class="alert alert-danger">
+                                <?php echo $this->session->flashdata('error'); ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if ($this->session->flashdata('success')): ?>
+                            <div class="alert alert-success">
+                                <?php echo $this->session->flashdata('success'); ?>
+                            </div>
+                        <?php endif; ?>
+
                         <div class="col-md-6">
                             <div class="form-floating mb-3">
                                 <input type="text" name="nik_peserta" class="form-control form-control-lg" id="nik_peserta"
@@ -64,7 +77,7 @@
 
                         <div class="col-md-4">
                             <div class="form-floating mb-3">
-                                <select name="jenis_kelamin" class="form-select form-select-lg" id="jenis_kelamin" required>
+                                <select name="jenis_kelamin_id" class="form-select form-select-lg" id="jenis_kelamin" required>
                                     <option value="" selected disabled>Pilih Jenis Kelamin</option>
                                     <option value="Laki-laki">Laki-laki</option>
                                     <option value="Perempuan">Perempuan</option>
@@ -110,11 +123,11 @@
 
                         <div class="col-md-6">
                             <div class="form-floating mb-3">
-                                <select name="modul_pelatihan" class="form-select form-select-lg" id="modul_pelatihan" required>
+                                <select name="id_modul" class="form-select form-select-lg" id="modul_pelatihan" required>
                                     <option value="" selected disabled>Pilih Modul Pelatihan</option>
-                                    <option value="Pemrograman">Pemrograman</option>
-                                    <option value="Desain Grafis">Desain Grafis</option>
-                                    <option value="Animasi">Animasi</option>
+                                    <option value="1">Pemrograman</option>
+                                    <option value="2">Desain Grafis</option>
+                                    <option value="3">Animasi</option>
                                 </select>
                                 <label for="modul_pelatihan" class="text-muted">
                                     <i class="fas fa-book me-2"></i>Modul Pelatihan
@@ -374,5 +387,27 @@
                 });
             }, false);
         })();
+    });
+
+    $('#nik_peserta, #no_induk_peserta').on('input', function() {
+        const nik = $('#nik_peserta').val().trim();
+        const noInduk = $('#no_induk_peserta').val().trim();
+
+        if (nik !== '' && noInduk !== '' && nik === noInduk) {
+            alert('NIK dan No Induk Peserta tidak boleh sama!');
+            $('#nik_peserta, #no_induk_peserta').addClass('is-invalid');
+        } else {
+            $('#nik_peserta, #no_induk_peserta').removeClass('is-invalid');
+        }
+    });
+
+    $('form').on('submit', function(e) {
+        const nik = $('#nik_peserta').val().trim();
+        const noInduk = $('#no_induk_peserta').val().trim();
+
+        if (nik === noInduk) {
+            e.preventDefault();
+            alert('NIK dan No Induk Peserta tidak boleh sama!');
+        }
     });
 </script>
