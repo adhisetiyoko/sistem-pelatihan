@@ -71,6 +71,8 @@ class Settings extends CI_Controller
 
     public function security()
     {
+        $data['title'] = 'Pengaturan';
+
         $this->load->library('user_agent');
         $this->load->helper('google_authenticator');
         $user_id = $this->session->userdata('user_id');

@@ -66,12 +66,12 @@
 
                         <div class="col-md-4">
                             <div class="form-floating mb-3">
-                                <select name="jenis_kelamin_id" class="form-select form-select-lg" id="jenis_kelamin" required>
+                                <select name="jenis_kelamin_id" class="form-select form-select-lg" id="jenis_kelamin_id" required>
                                     <option value="" disabled selected>Pilih Jenis Kelamin</option>
-                                    <option value="Laki-laki" <?php echo set_select('jenis_kelamin_id', 'Laki-laki', ($peserta->jenis_kelamin_id == 'Laki-laki')); ?>>Laki-laki</option>
-                                    <option value="Perempuan" <?php echo set_select('jenis_kelamin_id', 'Perempuan', ($peserta->jenis_kelamin_id == 'Perempuan')); ?>>Perempuan</option>
+                                    <option value="L" <?php echo set_select('jenis_kelamin_id', 'L', ($peserta->jenis_kelamin_id == 'L')); ?>>Laki-laki</option>
+                                    <option value="P" <?php echo set_select('jenis_kelamin_id', 'P', ($peserta->jenis_kelamin_id == 'P')); ?>>Perempuan</option>
                                 </select>
-                                <label for="jenis_kelamin" class="text-muted">
+                                <label for="jenis_kelamin_id" class="text-muted">
                                     <i class="fas fa-venus-mars me-2"></i>Jenis Kelamin
                                 </label>
                                 <div class="invalid-feedback">Harap pilih jenis kelamin</div>

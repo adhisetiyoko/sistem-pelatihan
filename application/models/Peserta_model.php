@@ -200,4 +200,18 @@ class Peserta_model extends CI_Model
     {
         return $this->db->get('jenis_kelamin')->result();
     }
+
+    // cek apakah nik sudah ada di database
+    public function check_nik_exists($nik)
+    {
+        $this->db->where('nik_peserta', $nik);
+        return $this->db->count_all_results('peserta') > 0;
+    }
+
+    // cek apakah no induk sudah ada di database
+    public function check_no_induk_exists($no_induk)
+    {
+        $this->db->where('no_induk_peserta', $no_induk);
+        return $this->db->count_all_results('peserta') > 0;
+    }
 }

@@ -178,71 +178,108 @@ class Dashboard extends MY_Controller
 
     public function tambah_peserta()
     {
-        // Set form validation rules
-        $this->form_validation->set_rules('nik_peserta', 'NIK', 'required|is_unique[peserta_pelatihan.nik_peserta]');
-        $this->form_validation->set_rules('no_induk_peserta', 'No Induk', 'required|is_unique[peserta_pelatihan.no_induk_peserta]');
-        $this->form_validation->set_rules('nama_peserta', 'Nama Peserta', 'required');
-        $this->form_validation->set_rules('jenis_kelamin_id', 'Jenis Kelamin', 'required');
-        $this->form_validation->set_rules('tempat_lahir', 'Tempat Lahir', 'required');
-        $this->form_validation->set_rules('tanggal_lahir', 'Tanggal Lahir', 'required|callback_valid_date');
-        $this->form_validation->set_rules('no_telp', 'No HP', 'required|numeric');
-        $this->form_validation->set_rules('id_modul', 'Modul Pelatihan', 'required');
-        $this->form_validation->set_rules('alamat', 'Alamat', 'required');
+        // Set form validation rules dengan pesan error bahasa Indonesia
+        $this->form_validation->set_rules('nik_peserta', 'NIK', 'required|is_unique[peserta_pelatihan.nik_peserta]', [
+            'required' => 'NIK wajib diisi.',
+            'is_unique' => 'NIK ini sudah terdaftar dalam sistem.'
+        ]);
+
+        $this->form_validation->set_rules('no_induk_peserta', 'Nomor Induk', 'required|is_unique[peserta_pelatihan.no_induk_peserta]', [
+            'required' => 'Nomor Induk wajib diisi.',
+            'is_unique' => 'Nomor Induk ini sudah terdaftar dalam sistem.'
+        ]);
+
+        $this->form_validation->set_rules('nama_peserta', 'Nama Peserta', 'required', [
+            'required' => 'Nama Peserta wajib diisi.'
+        ]);
+
+        $this->form_validation->set_rules('jenis_kelamin_id', 'Jenis Kelamin', 'required', [
+            'required' => 'Jenis Kelamin wajib dipilih.'
+        ]);
+
+        $this->form_validation->set_rules('tempat_lahir', 'Tempat Lahir', 'required', [
+            'required' => 'Tempat Lahir wajib diisi.'
+        ]);
+
+        $this->form_validation->set_rules('tanggal_lahir', 'Tanggal Lahir', 'required|callback_valid_date', [
+            'required' => 'Tanggal Lahir wajib diisi.'
+        ]);
+
+        $this->form_validation->set_rules('no_telp', 'Nomor Telepon', 'required|numeric', [
+            'required' => 'Nomor Telepon wajib diisi.',
+            'numeric' => 'Nomor Telepon harus berupa angka.'
+        ]);
+
+        $this->form_validation->set_rules('id_modul', 'Modul Pelatihan', 'required', [
+            'required' => 'Modul Pelatihan wajib dipilih.'
+        ]);
+
+        $this->form_validation->set_rules('alamat', 'Alamat', 'required', [
+            'required' => 'Alamat wajib diisi.'
+        ]);
+
+        // Untuk callback custom validation
+        $this->form_validation->set_message('valid_date', 'Format tanggal pada %s tidak valid.');
+
+        // Simpan semua data input ke dalam variabel untuk digunakan kembali jika validasi gagal
+        $data['form_data'] = [
+            'nik_peserta' => $this->input->post('nik_peserta'),
+            'no_induk_peserta' => $this->input->post('no_induk_peserta'),
+            'nama_peserta' => $this->input->post('nama_peserta'),
+            'jenis_kelamin_id' => $this->input->post('jenis_kelamin_id'),
+            'tempat_lahir' => $this->input->post('tempat_lahir'),
+            'tanggal_lahir' => $this->input->post('tanggal_lahir'),
+            'no_telp' => $this->input->post('no_telp'),
+            'id_modul' => $this->input->post('id_modul'),
+            'alamat' => $this->input->post('alamat')
+        ];
+
+        $data['title'] = 'Tambah Peserta';
 
         if ($this->form_validation->run() === FALSE) {
-            // Jika form validation gagal, tampilkan form lagi
-            $data = [
-                'title' => 'Tambah Peserta',
-                'nik_peserta' => $this->input->post('nik_peserta'),
-                'no_induk_peserta' => $this->input->post('no_induk_peserta'),
-                'nama_peserta' => $this->input->post('nama_peserta'),
-                'jenis_kelamin_id' => $this->input->post('jenis_kelamin_id'),
-                'tempat_lahir' => $this->input->post('tempat_lahir'),
-                'tanggal_lahir' => $this->input->post('tanggal_lahir'),
-                'no_telp' => $this->input->post('no_telp'),
-                'id_modul' => $this->input->post('id_modul'),
-                'alamat' => $this->input->post('alamat'),
-            ];
-
+            // Load view dengan data yang sudah diisi
             $this->load->view('templates/header', $data);
             $this->load->view('dashboard/peserta/tambah', $data);
             $this->load->view('templates/footer');
         } else {
+            // Proses jika validasi berhasil
             // Cek jika nik_peserta atau no_induk_peserta sudah ada di database
             $nik_peserta = $this->input->post('nik_peserta');
             $no_induk_peserta = $this->input->post('no_induk_peserta');
 
-            // Cek keberadaan nik_peserta dan no_induk_peserta
+            // 1. Cek jika NIK dan NIP sama
             if ($nik_peserta === $no_induk_peserta) {
                 $this->session->set_flashdata('error', 'NIK dan No Induk Peserta tidak boleh sama.');
-                redirect('dashboard/tambah_peserta');
+                $this->session->set_flashdata('form_data', $data['form_data']);
+                redirect('dashboard/peserta/tambah');
                 return;
             }
 
-            // Cek keberadaan nik_peserta
+            // 2. Cek duplikat NIK (tambahan validasi manual meskipun sudah ada is_unique rule)
             $nik_exists = $this->db->get_where('peserta_pelatihan', ['nik_peserta' => $nik_peserta])->num_rows() > 0;
-            // Cek keberadaan no_induk_peserta
-            $no_induk_exists = $this->db->get_where('peserta_pelatihan', ['no_induk_peserta' => $no_induk_peserta])->num_rows() > 0;
-
             if ($nik_exists) {
                 $this->session->set_flashdata('error', 'NIK sudah terdaftar');
+                $this->session->set_flashdata('form_data', $data['form_data']);
                 redirect('dashboard/peserta/tambah');
+                return;
             }
 
+            // 3. Cek duplikat NIP (tambahan validasi manual meskipun sudah ada is_unique rule)
+            $no_induk_exists = $this->db->get_where('peserta_pelatihan', ['no_induk_peserta' => $no_induk_peserta])->num_rows() > 0;
             if ($no_induk_exists) {
                 $this->session->set_flashdata('error', 'No Induk sudah terdaftar');
+                $this->session->set_flashdata('form_data', $data['form_data']);
                 redirect('dashboard/peserta/tambah');
+                return;
             }
 
-            // Jika data tidak ada di database, lanjutkan penyimpanan
+            // Jika semua validasi berhasil
             $peserta_data = $this->input->post();
             $this->Peserta_model->create($peserta_data);
             $this->session->set_flashdata('success', 'Data peserta berhasil ditambahkan');
             redirect('dashboard/peserta');
         }
     }
-
-
 
     public function edit_peserta($id)
     {
@@ -545,17 +582,45 @@ class Dashboard extends MY_Controller
         exit;
     }
 
-    // Fungsi untuk validasi format tanggal
+    // // Fungsi untuk validasi format tanggal
+    // public function valid_date($date)
+    // {
+    //     // Cek apakah format tanggal valid (YYYY-MM-DD)
+    //     $format = 'Y-m-d';
+    //     $d = DateTime::createFromFormat($format, $date);
+    //     if ($d && $d->format($format) === $date) {
+    //         return TRUE; // Format tanggal valid
+    //     } else {
+    //         $this->form_validation->set_message('valid_date', 'Tanggal Lahir tidak valid. Format yang benar adalah YYYY-MM-DD.');
+    //         return FALSE; // Format tanggal tidak valid
+    //     }
+    // }
+
+    // Fungsi callback untuk validasi tanggal
     public function valid_date($date)
     {
-        // Cek apakah format tanggal valid (YYYY-MM-DD)
-        $format = 'Y-m-d';
-        $d = DateTime::createFromFormat($format, $date);
-        if ($d && $d->format($format) === $date) {
-            return TRUE; // Format tanggal valid
-        } else {
-            $this->form_validation->set_message('valid_date', 'Tanggal Lahir tidak valid. Format yang benar adalah YYYY-MM-DD.');
-            return FALSE; // Format tanggal tidak valid
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            return FALSE;
         }
+
+        // Validasi tanggal yang valid menggunakan PHP DateTime
+        $d = DateTime::createFromFormat('Y-m-d', $date);
+        return $d && $d->format('Y-m-d') === $date;
+    }
+
+    // Fungsi untuk memeriksa apakah NIK dan No Induk sudah ada di database
+    public function check_peserta()
+    {
+        $nik = $this->input->post('nik');
+        $no_induk = $this->input->post('no_induk');
+
+        $this->load->model('Peserta_model');
+
+        $result = array(
+            'nik_exists' => $this->Peserta_model->check_nik_exists($nik),
+            'no_induk_exists' => $this->Peserta_model->check_no_induk_exists($no_induk)
+        );
+
+        echo json_encode($result);
     }
 }

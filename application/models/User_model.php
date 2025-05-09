@@ -149,6 +149,7 @@ class User_model extends CI_Model
         $data = [
             'last_login' => date('Y-m-d H:i:s'),
             'last_activity' => date('Y-m-d H:i:s'),
+            'last_login_ip' => $_SERVER['REMOTE_ADDR'],
             'is_active' => 1
         ];
 
